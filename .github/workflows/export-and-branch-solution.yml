@@ -44,10 +44,10 @@ jobs:
       - name: Validate connection
         uses: microsoft/powerplatform-actions/who-am-i@v1
         with:
-          environment-url: ${{ env.ENVIRONMENT_URL }}
-          app-id: ${{ env.CLIENT_ID }}
+          environment-url: ${{ vars.POWER_PLATFORM_ENVIRONMENT_URL }}
+          app-id: ${{ vars.POWER_PLATFORM_CLIENT_ID }}
           client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
-          tenant-id: ${{ env.TENANT_ID }}
+          tenant-id: ${{ vars.POWER_PLATFORM_TENANT_ID }}
 
       - name: Export unmanaged solution
         uses: microsoft/powerplatform-actions/export-solution@v1
