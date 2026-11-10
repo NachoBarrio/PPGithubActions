@@ -6,13 +6,36 @@ on:
       solution_name:
         description: Unique name of the solution
         required: true
+        type: string
+
       solution_folder:
         description: Solution folder in the repository
         required: true
         default: solutions
+        type: string
+
       solution_version:
         description: Version to deploy, for example 1.0.0.1
         required: true
+        type: string
+
+  workflow_call:
+    inputs:
+      solution_name:
+        description: Unique name of the solution
+        required: true
+        type: string
+
+      solution_folder:
+        description: Solution folder in the repository
+        required: false
+        default: solutions
+        type: string
+
+      solution_version:
+        description: Version to deploy
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -69,6 +92,10 @@ jobs:
       - name: Store deployed artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.solution_name }}-${{ inputs.solution_version }}
-          path: out/${{ inputs.solution_name }}_managed.zip
+          name: >-
+            ${{ inputs.solution_name }}-${{
+            inputs.solution_version }}
+          path: >-
+            out/${{ inputs.solution_name }}_managed.zip
           retention-days: 30
+          if-no-files-found: error
