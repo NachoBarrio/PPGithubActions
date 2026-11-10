@@ -1,14 +1,17 @@
 name: Release action
 
-# Calls the reusable workflow when a GitHub Release is created.
-
 on:
   release:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
-  release-solution-Githubactionstests:
+  release-solution:
     uses: ./.github/workflows/deploy-solution-to-production.yml
     with:
       solution_name: Githubactionstests
+      solution_folder: solutions
+      solution_version: ${{ github.event.release.tag_name }}
     secrets: inherit
