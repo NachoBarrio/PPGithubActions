@@ -1,0 +1,21 @@
+name: Release action
+
+# Calls the reusable workflow when a GitHub Release is created.
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release-solution-Githubactionstests:
+    uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
+    with:
+      solution_name: Githubactionstests
+
+      BUILD_ENVIRONMENT_URL: ${{ vars.BUILD_ENVIRONMENT_URL }}
+      PRODUCTION_ENVIRONMENT_URL: ${{ vars.PRODUCTION_ENVIRONMENT_URL }}
+      CLIENT_ID: ${{ vars.POWER_PLATFORM_CLIENT_ID }}
+      TENANT_ID: ${{ vars.POWER_PLATFORM_TENANT_ID }}
+
+    secrets:
+      envSecret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
