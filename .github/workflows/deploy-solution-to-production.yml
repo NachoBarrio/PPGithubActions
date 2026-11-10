@@ -7,13 +7,11 @@ on:
         description: Unique name of the solution
         required: true
         type: string
-
       solution_folder:
         description: Solution folder in the repository
         required: true
         default: solutions
         type: string
-
       solution_version:
         description: Version to deploy, for example 1.0.0.1
         required: true
@@ -25,13 +23,11 @@ on:
         description: Unique name of the solution
         required: true
         type: string
-
       solution_folder:
         description: Solution folder in the repository
         required: false
         default: solutions
         type: string
-
       solution_version:
         description: Version to deploy
         required: true
@@ -41,9 +37,10 @@ permissions:
   contents: read
 
 jobs:
-  deploy-to-production:
+  build-managed-solution:
+    name: Build managed solution
     runs-on: windows-latest
-    environment: Pro customer service trial
+    environment: Esteve deployment test
 
     env:
       ENVIRONMENT_URL: ${{ vars.POWER_PLATFORM_ENVIRONMENT_URL }}
@@ -57,6 +54,83 @@ jobs:
       - name: Install Power Platform tools
         uses: microsoft/powerplatform-actions/actions-install@v1
 
+      - name: Validate build environment connection
+        uses: microsoft/powerplatform-actions/who-am-i@v1
+        with:
+          environment-url: ${{ env.ENVIRONMENT_URL }}
+          app-id: ${{ env.CLIENT_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ env.TENANT_ID }}
+
+      - name: Pack solution as unmanaged
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-folder: >-
+            ${{ inputs.solution_folder }}/${{
+            inputs.solution_name }}
+          solution-file: >-
+            out/unmanaged/${{
+            inputs.solution_name }}.zip
+          solution-type: Unmanaged
+
+      - name: Import unmanaged solution into build environment
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: ${{ env.ENVIRONMENT_URL }}
+          app-id: ${{ env.CLIENT_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ env.TENANT_ID }}
+          solution-file: >-
+            out/unmanaged/${{
+            inputs.solution_name }}.zip
+          force-overwrite: true
+          publish-changes: true
+          run-asynchronously: true
+          max-async-wait-time: 60
+
+      - name: Export solution as managed
+        uses: microsoft/powerplatform-actions/export-solution@v1
+        with:
+          environment-url: ${{ env.ENVIRONMENT_URL }}
+          app-id: ${{ env.CLIENT_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ env.TENANT_ID }}
+          solution-name: ${{ inputs.solution_name }}
+          solution-output-file: >-
+            out/managed/${{
+            inputs.solution_name }}_managed.zip
+          managed: true
+          run-asynchronously: true
+          max-async-wait-time: 60
+          overwrite: true
+
+      - name: Upload managed solution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: >-
+            ${{ inputs.solution_name }}-${{
+            inputs.solution_version }}-managed
+          path: >-
+            out/managed/${{
+            inputs.solution_name }}_managed.zip
+          retention-days: 30
+          if-no-files-found: error
+
+  deploy-to-production:
+    name: Deploy managed solution to production
+    needs: build-managed-solution
+    runs-on: windows-latest
+    environment: Pro customer service trial
+
+    env:
+      ENVIRONMENT_URL: ${{ vars.POWER_PLATFORM_ENVIRONMENT_URL }}
+      CLIENT_ID: ${{ vars.POWER_PLATFORM_CLIENT_ID }}
+      TENANT_ID: ${{ vars.POWER_PLATFORM_TENANT_ID }}
+
+    steps:
+      - name: Install Power Platform tools
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
       - name: Validate production connection
         uses: microsoft/powerplatform-actions/who-am-i@v1
         with:
@@ -65,15 +139,13 @@ jobs:
           client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
           tenant-id: ${{ env.TENANT_ID }}
 
-      - name: Pack managed solution
-        uses: microsoft/powerplatform-actions/pack-solution@v1
+      - name: Download managed solution artifact
+        uses: actions/download-artifact@v4
         with:
-          solution-folder: >-
-            ${{ inputs.solution_folder }}/${{
-            inputs.solution_name }}
-          solution-file: >-
-            out/${{ inputs.solution_name }}_managed.zip
-          solution-type: Managed
+          name: >-
+            ${{ inputs.solution_name }}-${{
+            inputs.solution_version }}-managed
+          path: out/managed
 
       - name: Import managed solution into production
         uses: microsoft/powerplatform-actions/import-solution@v1
@@ -83,19 +155,9 @@ jobs:
           client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
           tenant-id: ${{ env.TENANT_ID }}
           solution-file: >-
-            out/${{ inputs.solution_name }}_managed.zip
+            out/managed/${{
+            inputs.solution_name }}_managed.zip
           force-overwrite: false
           publish-changes: true
           run-asynchronously: true
           max-async-wait-time: 60
-
-      - name: Store deployed artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: >-
-            ${{ inputs.solution_name }}-${{
-            inputs.solution_version }}
-          path: >-
-            out/${{ inputs.solution_name }}_managed.zip
-          retention-days: 30
-          if-no-files-found: error
