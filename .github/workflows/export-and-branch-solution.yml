@@ -30,6 +30,7 @@ env:
 jobs:
   export-from-dev:
     runs-on: windows-latest
+    environment: Esteve deployment test
 
     steps:
       - name: Checkout repository
