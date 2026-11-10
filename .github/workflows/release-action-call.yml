@@ -8,7 +8,7 @@ on:
 
 jobs:
   release-solution-Githubactionstests:
-    uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
+    uses: ./.github/workflows/deploy-solution-to-production.yml
     with:
       solution_name: Githubactionstests
 
