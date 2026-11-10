@@ -1,0 +1,86 @@
+name: Export and branch Power Platform solution
+
+on:
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: Unique name of the solution
+        required: true
+      solution_exported_folder:
+        description: Temporary export folder
+        required: true
+        default: out/exported
+      solution_folder:
+        description: Temporary unpacked solution folder
+        required: true
+        default: out/solutions
+      solution_target_folder:
+        description: Repository solutions folder
+        required: true
+        default: solutions
+
+permissions:
+  contents: write
+
+env:
+  ENVIRONMENT_URL: ${{ vars.POWER_PLATFORM_ENVIRONMENT_URL }}
+  CLIENT_ID: ${{ vars.POWER_PLATFORM_CLIENT_ID }}
+  TENANT_ID: ${{ vars.POWER_PLATFORM_TENANT_ID }}
+
+jobs:
+  export-from-dev:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install Power Platform tools
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      - name: Validate connection
+        uses: microsoft/powerplatform-actions/who-am-i@v1
+        with:
+          environment-url: ${{ env.ENVIRONMENT_URL }}
+          app-id: ${{ env.CLIENT_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ env.TENANT_ID }}
+
+      - name: Export unmanaged solution
+        uses: microsoft/powerplatform-actions/export-solution@v1
+        with:
+          environment-url: ${{ env.ENVIRONMENT_URL }}
+          app-id: ${{ env.CLIENT_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ env.TENANT_ID }}
+          solution-name: ${{ inputs.solution_name }}
+          solution-output-file: >-
+            ${{ inputs.solution_exported_folder }}/${{
+            inputs.solution_name }}.zip
+          managed: false
+
+      - name: Unpack solution
+        uses: microsoft/powerplatform-actions/unpack-solution@v1
+        with:
+          solution-file: >-
+            ${{ inputs.solution_exported_folder }}/${{
+            inputs.solution_name }}.zip
+          solution-folder: >-
+            ${{ inputs.solution_folder }}/${{
+            inputs.solution_name }}
+          solution-type: Unmanaged
+          overwrite-files: true
+
+      - name: Create branch with solution changes
+        uses: microsoft/powerplatform-actions/branch-solution@v1
+        with:
+          solution-folder: >-
+            ${{ inputs.solution_folder }}/${{
+            inputs.solution_name }}
+          solution-target-folder: >-
+            ${{ inputs.solution_target_folder }}/${{
+            inputs.solution_name }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-empty-commit: true
