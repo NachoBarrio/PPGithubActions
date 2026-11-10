@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{0cb1711c-19d9-4773-b3c5-d9f2b9b11e8c}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{A958EF77-A915-4EFA-BE0C-B76DA9EAFBEE}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{2F75DE9E-6C52-4799-876C-2036C191AFA1}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{3D5A715A-7956-4FC1-8602-03EC870A85B5}">
+                        <labels>
+                          <label description="" languagecode="1033" />
+                        </labels>
+                        <control id="cr32c_testname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="cr32c_TestName" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{8C3DF580-43E3-47B3-923F-85122AAABB94}">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{eee2cbba-afdb-4775-b92c-092a0e0361c3}">
+                        <labels>
+                          <label description="Temperature" languagecode="1033" />
+                        </labels>
+                        <control id="cr32c_temperature" classid="{c3efe0c3-0ec6-42be-8349-cbd9079dfd8e}" datafieldname="cr32c_temperature" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>
